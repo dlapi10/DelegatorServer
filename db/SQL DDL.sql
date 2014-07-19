@@ -38,3 +38,14 @@ start_date varchar(200),
 deadline varchar(200),
 title varchar(500)
 );
+
+create table task_categories(
+category varchar(100) primary key,
+color varchar(100)
+);
+
+create table task_cat_to_task(
+category varchar(100) references task_categories(category),
+task_id int references tasks(id),
+primary key (category, task_id)
+);

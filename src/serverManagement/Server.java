@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 
-
 public class Server {
 
 	/*
@@ -21,7 +20,9 @@ public class Server {
 	// All the client Threads
 	private static final ArrayList<ClientThread> clientTheads = new ArrayList<ClientThread>();
 	
+	
 	public static void main(String[] args) {
+		
 		/*
 		 * Open a server socket on the portNumber (default 2222). Note that we can
 		 * not choose a port less than 1023 if we are not privileged users (root).
