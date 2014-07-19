@@ -1,29 +1,28 @@
-package database;
+package serverManagement;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 
 public class ClientThread extends Thread{
-	private String clientName = null;
 	private BufferedReader inputStream = null;
 	private PrintStream outputStream = null;
 	private Socket clientSocket = null;
-	private final ClientThread[] threads;
-	private int maxClientsCount;
+	private final ArrayList<ClientThread> clientTheads;
+	
+	
 
-	public ClientThread(Socket clientSocket, ClientThread[] threads) {
+	public ClientThread(Socket clientSocket, ArrayList<ClientThread> clientTheads) {
 		this.clientSocket = clientSocket;
-		this.threads = threads;
-		maxClientsCount = threads.length;
+		this.clientTheads = clientTheads;
 	}
 
 	public void run() {
-		int maxClientsCount = this.maxClientsCount;
-		ClientThread[] threads = this.threads;
+		ArrayList<ClientThread> clientTheads = this.clientTheads; 
 
 		try {
 			/*
@@ -35,6 +34,7 @@ public class ClientThread extends Thread{
 			
 			/*
 			 * Messages
+			 * 
 			 */
 
 			/*
@@ -42,9 +42,9 @@ public class ClientThread extends Thread{
 			 * could be accepted by the server.
 			 */
 			synchronized (this) {
-				for (int i = 0; i < maxClientsCount; i++) {
-					if (threads[i] == this) {
-						threads[i] = null;
+				for(int i=0; i<clientTheads.size();i++){
+					if(clientTheads.get(i) == this){
+						clientTheads.remove(i);
 					}
 				}
 			}
