@@ -9,13 +9,20 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import model.Task;
+
+import com.google.gson.Gson;
+
 import database.MySQLCommunicator;
 import database.MySQLDBInfo;
 
 
 public class ClientThread extends Thread{
 	//Constants
-	private static final String FINISHING_MESSAGE = "FINISH";
+	public static final String FINISHING_MESSAGE = "FINISH";
+	public static final String MSG_SYNC_ALL="SYNC_ALL";
+	public static final String MSG_ADD_TASK="ADD_TASK";
+	public static final String MSG_ADD_GROUP="ADD_GROUP";
 	
 	//Private variables
 	private BufferedReader inputStream = null;
@@ -55,16 +62,22 @@ public class ClientThread extends Thread{
 			 */
 			
 			while(true){
-				String inputMessage = inputStream.readLine();
-				if(inputMessage.equals(FINISHING_MESSAGE)){
+				String inputHeader;
+				String inputMessage;
+				inputHeader = inputStream.readLine();
+				inputMessage = inputStream.readLine();
+				System.out.println(inputHeader);
+				System.out.println(inputMessage);
+				if(inputHeader.equals(FINISHING_MESSAGE)){
 					break;
 				}
-				if(inputMessage!=null){
-					if(inputMessage.startsWith("update") || inputMessage.startsWith("insert") || inputMessage.startsWith("delete")){
-						synchronized (this) {
-							//Updating Database. Inserting, updating or deleting raws
-							communicator.execUpdate(inputMessage); 
-							System.out.println("update done");
+				if(inputHeader!=null){
+					System.out.println(inputHeader);
+					if(inputMessage!=null){
+						if (inputHeader.startsWith(MSG_ADD_TASK)){
+							Gson gson = new Gson();
+							Task task = gson.fromJson(inputMessage, Task.class);
+							communicator.addTask(task);
 						}
 					}else{
 						
@@ -77,11 +90,7 @@ public class ClientThread extends Thread{
 			 * could be accepted by the server.
 			 */
 			synchronized (this) {
-				for(int i=0; i<clientTheads.size();i++){
-					if(clientTheads.get(i) == this){
-						clientTheads.remove(i);
-					}
-				}
+				clientTheads.clear();
 			}
 			/*
 			 * Close the output stream, close the input stream, close the socket.
