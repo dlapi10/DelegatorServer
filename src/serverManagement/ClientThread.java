@@ -25,7 +25,7 @@ public class ClientThread extends Thread{
 	public static final String MSG_ADD_TASK="ADD_TASK";
 	public static final String MSG_ADD_GROUP="ADD_GROUP";
 	public static final String MSG_SYNC_OVER="SYNC_OVER";
-	
+
 	//Private variables
 	private BufferedReader inputStream = null;
 	private PrintStream outputStream = null;
@@ -33,7 +33,7 @@ public class ClientThread extends Thread{
 	private final ArrayList<ClientThread> clientTheads;
 	private Connection dbConnection;
 	private MySQLCommunicator communicator;
-	
+
 
 	public ClientThread(Socket clientSocket, ArrayList<ClientThread> clientTheads) {
 		this.clientSocket = clientSocket;
@@ -60,17 +60,16 @@ public class ClientThread extends Thread{
 	}
 
 	/**
-	 * Sending Message to everyone Except iniciator
+	 * Sending Message to everyone
 	 * @param header
 	 * @param message
 	 */
-	public void sendMessageToEveryOneExceptMe(String header, String message){
+	public void sendMessageToEveryOne(String header, String message){
 		for(int i=0;i<clientTheads.size();i++){
-			if(!clientTheads.get(i).equals(this))
-				sendMessage(clientTheads.get(i),header, message);
+			sendMessage(clientTheads.get(i),header, message);
 		}
 	}
-	
+
 	public void syncAllTasks(ClientThread th){
 		ArrayList<Task> allTasks=null;
 		try {
@@ -85,7 +84,7 @@ public class ClientThread extends Thread{
 		}
 		sendMessage(th,MSG_SYNC_OVER, null);
 	}
-	
+
 	public void run() {
 		ArrayList<ClientThread> clientTheads = this.clientTheads; 
 
@@ -95,19 +94,19 @@ public class ClientThread extends Thread{
 			 */
 			inputStream = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
 			outputStream = new PrintStream(clientSocket.getOutputStream());
-			
-			
+
+
 			/*
 			 * Messages
 			 * 
 			 */
-			
+
 			while(true){
 				String inputHeader;
 				String inputMessage;
 				inputHeader = inputStream.readLine();
 				inputMessage = inputStream.readLine();
-				
+
 				if(inputHeader!=null){
 					if(inputHeader.equals(FINISHING_MESSAGE)){
 						break;
@@ -118,16 +117,16 @@ public class ClientThread extends Thread{
 							Gson gson = new Gson();
 							Task task = gson.fromJson(inputMessage, Task.class);
 							communicator.addTask(task);
-							sendMessageToEveryOneExceptMe(MSG_ADD_TASK, inputMessage);
+							sendMessageToEveryOne(MSG_ADD_TASK, inputMessage);
 						}else if(inputHeader.startsWith(MSG_SYNC_ALL)){
 							syncAllTasks(this);
 						}
 					}else{
-						
+
 					}
 				}
 			}
-			
+
 			/*
 			 * Clean up. Set the current thread variable to null so that a new client
 			 * could be accepted by the server.
