@@ -30,14 +30,14 @@ public class ClientThread extends Thread{
 	private BufferedReader inputStream = null;
 	private PrintStream outputStream = null;
 	private Socket clientSocket = null;
-	private final ArrayList<ClientThread> clientTheads;
+	private final ArrayList<ClientThread> clientThreads;
 	private Connection dbConnection;
 	private MySQLCommunicator communicator;
 
 
 	public ClientThread(Socket clientSocket, ArrayList<ClientThread> clientTheads) {
 		this.clientSocket = clientSocket;
-		this.clientTheads = clientTheads;
+		this.clientThreads = clientTheads;
 		dbConnection = MySQLDBInfo.getConnection();
 		try {
 			MySQLDBInfo.startUpStatement(dbConnection);
@@ -64,9 +64,10 @@ public class ClientThread extends Thread{
 	 * @param header
 	 * @param message
 	 */
-	public void sendMessageToEveryOne(String header, String message){
-		for(int i=0;i<clientTheads.size();i++){
-			sendMessage(clientTheads.get(i),header, message);
+	public void sendMessageToEveryOneExceptMe(String header, String message){
+		for(int i=0;i<clientThreads.size();i++){
+			if(!clientThreads.get(i).equals(this))
+				sendMessage(clientThreads.get(i),header, message);
 		}
 	}
 
@@ -86,7 +87,7 @@ public class ClientThread extends Thread{
 	}
 
 	public void run() {
-		ArrayList<ClientThread> clientTheads = this.clientTheads; 
+		ArrayList<ClientThread> clientTheads = this.clientThreads; 
 
 		try {
 			/*
@@ -117,7 +118,7 @@ public class ClientThread extends Thread{
 							Gson gson = new Gson();
 							Task task = gson.fromJson(inputMessage, Task.class);
 							communicator.addTask(task);
-							sendMessageToEveryOne(MSG_ADD_TASK, inputMessage);
+							sendMessageToEveryOneExceptMe(MSG_ADD_TASK, inputMessage);
 						}else if(inputHeader.startsWith(MSG_SYNC_ALL)){
 							syncAllTasks(this);
 						}
