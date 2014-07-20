@@ -64,6 +64,7 @@ public class ClientThread extends Thread{
 						synchronized (this) {
 							//Updating Database. Inserting, updating or deleting raws
 							communicator.execUpdate(inputMessage); 
+							System.out.println("update done");
 						}
 					}else{
 						

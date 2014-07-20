@@ -1,13 +1,11 @@
 package database;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class MySQLCommunicator {
 	//Private variables
-	private ResultSet resultSet;
 	private Connection connection;
 	private Statement statement;
 	
@@ -28,5 +26,6 @@ public class MySQLCommunicator {
 			e.printStackTrace();
 		}
 	}
+	
 	
 }
