@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import model.Task;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import database.MySQLCommunicator;
 import database.MySQLDBInfo;
@@ -23,6 +24,7 @@ public class ClientThread extends Thread{
 	public static final String MSG_SYNC_ALL="SYNC_ALL";
 	public static final String MSG_ADD_TASK="ADD_TASK";
 	public static final String MSG_ADD_GROUP="ADD_GROUP";
+	public static final String MSG_SYNC_OVER="SYNC_OVER";
 	
 	//Private variables
 	private BufferedReader inputStream = null;
@@ -45,6 +47,40 @@ public class ClientThread extends Thread{
 		communicator = new MySQLCommunicator(dbConnection);
 	}
 
+	/**
+	 * Sends message to the client
+	 * @param message
+	 */
+	public void sendMessage(String header, String message) {
+		if (outputStream != null && !outputStream.checkError()) {
+			outputStream.println(header);
+			outputStream.println(message);
+			outputStream.flush();
+		}
+	}
+	
+	public void sendMessageToEveryOne(String header, String message){
+		for(int i=0;i<clientTheads.size();i++){
+			
+		}
+	}
+	
+	public void syncAllTasks(){
+		ArrayList<Task> allTasks=null;
+		try {
+			allTasks = communicator.getAlltasks();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0;i<allTasks.size();i++){
+			Gson gson = new GsonBuilder().create();
+			String message = gson.toJson(allTasks.get(i));
+			sendMessageToEveryOne(MSG_SYNC_ALL, message);
+		}
+		sendMessageToEveryOne(MSG_SYNC_OVER, null);
+	}
+	
 	public void run() {
 		ArrayList<ClientThread> clientTheads = this.clientTheads; 
 
@@ -80,7 +116,9 @@ public class ClientThread extends Thread{
 							communicator.addTask(task);
 						}
 					}else{
-						
+						if(inputHeader.startsWith(MSG_SYNC_ALL)){
+							syncAllTasks();
+						}
 					}
 				}
 			}
