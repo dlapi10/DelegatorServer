@@ -51,21 +51,21 @@ public class ClientThread extends Thread{
 	 * Sends message to the client
 	 * @param message
 	 */
-	public void sendMessage(String header, String message) {
-		if (outputStream != null && !outputStream.checkError()) {
-			outputStream.println(header);
-			outputStream.println(message);
-			outputStream.flush();
+	public void sendMessage(ClientThread  th, String header, String message) {
+		if (th.outputStream != null && !th.outputStream.checkError()) {
+			th.outputStream.println(header);
+			th.outputStream.println(message);
+			th.outputStream.flush();
 		}
 	}
 	
 	public void sendMessageToEveryOne(String header, String message){
 		for(int i=0;i<clientTheads.size();i++){
-			
+			sendMessage(clientTheads.get(i),header, message);
 		}
 	}
 	
-	public void syncAllTasks(){
+	public void syncAllTasks(ClientThread th){
 		ArrayList<Task> allTasks=null;
 		try {
 			allTasks = communicator.getAlltasks();
@@ -76,9 +76,9 @@ public class ClientThread extends Thread{
 		for(int i=0;i<allTasks.size();i++){
 			Gson gson = new GsonBuilder().create();
 			String message = gson.toJson(allTasks.get(i));
-			sendMessageToEveryOne(MSG_SYNC_ALL, message);
+			sendMessage(th,MSG_SYNC_ALL, message);
 		}
-		sendMessageToEveryOne(MSG_SYNC_OVER, null);
+		sendMessage(th,MSG_SYNC_OVER, null);
 	}
 	
 	public void run() {
@@ -117,7 +117,7 @@ public class ClientThread extends Thread{
 						}
 					}else{
 						if(inputHeader.startsWith(MSG_SYNC_ALL)){
-							syncAllTasks();
+							syncAllTasks(this);
 						}
 					}
 				}
@@ -128,7 +128,7 @@ public class ClientThread extends Thread{
 			 * could be accepted by the server.
 			 */
 			synchronized (this) {
-				clientTheads.clear();
+				clientTheads.remove(this);
 			}
 			/*
 			 * Close the output stream, close the input stream, close the socket.

@@ -18,7 +18,7 @@ public class Server {
 	// Socket port number to use
 	private static int port = 2728;
 	// All the client Threads
-	private static final ArrayList<ClientThread> clientTheads = new ArrayList<ClientThread>();
+	private static final ArrayList<ClientThread> clientThreads = new ArrayList<ClientThread>();
 	
 	
 	public static void main(String[] args) {
@@ -40,9 +40,9 @@ public class Server {
 	    while (true) {
 	      try {
 	        clientSocket = serverSocket.accept();
-	        ClientThread newClient = new ClientThread(clientSocket, clientTheads);
+	        ClientThread newClient = new ClientThread(clientSocket, clientThreads);
 	        newClient.start();
-	        clientTheads.add(newClient); // Starts when new client will join
+	        clientThreads.add(newClient); // Starts when new client will join
 	      } catch (IOException e) {
 	        System.out.println(e);
 	      }
