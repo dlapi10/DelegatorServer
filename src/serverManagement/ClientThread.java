@@ -55,13 +55,19 @@ public class ClientThread extends Thread{
 		if (th.outputStream != null && !th.outputStream.checkError()) {
 			th.outputStream.println(header);
 			th.outputStream.println(message);
-			th.outputStream.flush();
+			System.out.println("sent Message from server: header "+header+" message "+message);
 		}
 	}
-	
-	public void sendMessageToEveryOne(String header, String message){
+
+	/**
+	 * Sending Message to everyone Except iniciator
+	 * @param header
+	 * @param message
+	 */
+	public void sendMessageToEveryOneExceptMe(String header, String message){
 		for(int i=0;i<clientTheads.size();i++){
-			sendMessage(clientTheads.get(i),header, message);
+			if(!clientTheads.get(i).equals(this))
+				sendMessage(clientTheads.get(i),header, message);
 		}
 	}
 	
@@ -70,7 +76,6 @@ public class ClientThread extends Thread{
 		try {
 			allTasks = communicator.getAlltasks();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		for(int i=0;i<allTasks.size();i++){
@@ -102,23 +107,23 @@ public class ClientThread extends Thread{
 				String inputMessage;
 				inputHeader = inputStream.readLine();
 				inputMessage = inputStream.readLine();
-				System.out.println(inputHeader);
-				System.out.println(inputMessage);
-				if(inputHeader.equals(FINISHING_MESSAGE)){
-					break;
-				}
+				
 				if(inputHeader!=null){
+					if(inputHeader.equals(FINISHING_MESSAGE)){
+						break;
+					}
 					System.out.println(inputHeader);
 					if(inputMessage!=null){
 						if (inputHeader.startsWith(MSG_ADD_TASK)){
 							Gson gson = new Gson();
 							Task task = gson.fromJson(inputMessage, Task.class);
 							communicator.addTask(task);
-						}
-					}else{
-						if(inputHeader.startsWith(MSG_SYNC_ALL)){
+							sendMessageToEveryOneExceptMe(MSG_ADD_TASK, inputMessage);
+						}else if(inputHeader.startsWith(MSG_SYNC_ALL)){
 							syncAllTasks(this);
 						}
+					}else{
+						
 					}
 				}
 			}

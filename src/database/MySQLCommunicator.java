@@ -23,12 +23,15 @@ public class MySQLCommunicator {
 		this.connection = con;
 	}
 	
+	
 	/**
 	 * Updating database with given update
 	 * @param update
 	 */
 	public void execUpdate(String update){
 		try {
+			if(statement!=null)
+				statement.close();
 			statement = connection.createStatement();
 			statement.executeUpdate(update);
 			statement.close();
@@ -45,9 +48,9 @@ public class MySQLCommunicator {
 	 */
 	public ResultSet executeQuery(String query){
 		try {
+			if(statement!=null)statement.close();
 			statement = connection.createStatement();
 			ResultSet ans =statement.executeQuery(query);
-			statement.close();
 			return ans;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -64,12 +67,16 @@ public class MySQLCommunicator {
 		StringBuilder update = new StringBuilder("insert into tasks(reporter,assignee,`status`,description,priority,`completion`,start_date,deadline,title) values(");
 		if(task.getReporter()!=null && task.getReporter().getUserName()!=null) 
 			update.append("\""+task.getReporter().getUserName()+"\",");
+		else update.append("\"\",");
 		if(task.getAssignee()!=null && task.getAssignee().getUserName()!=null) 
 			update.append("\""+task.getAssignee().getUserName()+"\",");
+		else update.append("\"\",");
 		if(task.getStatus()!=null && task.getStatus().getStatusName()!=null) 
 			update.append("\""+task.getStatus().getStatusName()+"\",");
+		else update.append("\"\",");
 		if(task.getDescription()!=null) 
 			update.append("\""+task.getDescription()+"\",");
+		else update.append("\"\",");
 		
 		update.append(""+task.getPriority()+",");
 		update.append(""+task.getCompletionPercent()+",");
@@ -80,10 +87,12 @@ public class MySQLCommunicator {
 			date = formatter.format(task.getStartDate().getTime());
 			update.append("\""+date+"\",");
 		}
+		else update.append("\"\",");
 		if(task.getDeadLine()!=null) {
 			date = formatter.format(task.getDeadLine().getTime());
 			update.append("\""+date+"\",");
 		}
+		else update.append("\"\",");
 		update.append("\""+task.getTitle()+"\")");
 		System.out.println(update);
 		execUpdate(update.toString());

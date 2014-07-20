@@ -2,7 +2,7 @@ use delegator;
 
 select * from tasks;
 
-delete from tasks where id=1;
+delete from tasks where id=8;
 
 select * from task_categories;
 
